@@ -29,7 +29,11 @@ class Board:
         self.model = None
 
     def update_cubes(self):
-        self.cubes = [[Cube(self.board[i][j], i, j, self.width, self.height) for j in range(self.cols)] for i in range(self.rows)]
+        for j in range (self.cols):
+            for i in range(self.rows):
+                self.cubes[i][j].value = self.board[i][j]
+
+        # [[self.cubes[i][j].value = self.board[i][j] for j in range(self.cols)] for i in range(self.rows)]
 
     def draw(self, win):
         fnt = pygame.font.SysFont("comicsans", 40)
@@ -48,6 +52,25 @@ class Board:
         for i in range(9):
             for j in range(9):
                 self.cubes[i][j].draw(self.win)
+
+    def select(self,y ,x):
+        for i in range(9):
+            for j in range(9):
+                self.cubes[i][j].selected = False
+        self.cubes[y][x].selected = True
+
+    def parse(self, pos):
+        """
+        :param: pos
+        :return: (row, col)
+        """
+        if pos[0] < self.width and pos[1] < self.height:
+            gap = self.width / 9
+            x = pos[0] // gap
+            y = pos[1] // gap
+            return (int(y), int(x))
+        else:
+            return None
 
     def possible(self,y,x,n):
         for i in range(9):
@@ -78,7 +101,6 @@ class Board:
                             self.board[y][x] = 0
                     return
         self.solved = copy.deepcopy(self.board)
-        #print(self.solved)
 
     def gui_solve(self):
         for y in range(9):
@@ -95,6 +117,7 @@ class Cube:
         self.height= height
         self.col = col
         self.row = row
+        self.selected = False
 
     def draw(self,win):
         fnt = pygame.font.SysFont("comicsans", 40)
@@ -106,6 +129,10 @@ class Cube:
         if self.value!=0:
             text = fnt.render(str(self.value), 1, (0,0,0))
             win.blit(text, (x+(gap/2)-7, y+(gap/2)-7))
+
+        if self.selected:
+            pygame.draw.rect(win, (255,0,0), (x+1,y+2, gap ,gap), 3)
+
 
 def time(second):
     secs = second%60
@@ -130,7 +157,7 @@ def main():
     run = True
     while run:
         seconds = int((pygame.time.get_ticks() - start_ticks) / 1000)
-        pygame.time.delay(100)
+
 
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
@@ -138,6 +165,11 @@ def main():
             if event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_SPACE:
                     board.gui_solve()
+
+        if event.type == pygame.MOUSEBUTTONDOWN:
+            pos = pygame.mouse.get_pos()
+            parsed_pos = board.parse(pos)
+            board.select(parsed_pos[0], parsed_pos[1])
 
         redraw_board(board, seconds, win)
         pygame.display.update()
