@@ -6,5 +6,6 @@ Sudoku game that made with python and pygames (for GUI)and for the solver i am u
 - The health will be reduced by 1 every time the player put a wrong number in a wrong cube
 - If the health reaches 0 then the game will automatically restart
 - Press Space key for the hint
-Choose a cube and input the answer 
+
+#References
 Project insipired by TechWithTim
