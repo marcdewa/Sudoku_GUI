@@ -7,5 +7,3 @@ Sudoku game that made with python and pygames (for GUI)and for the solver i am u
 - If the health reaches 0 then the game will automatically restart
 - Press Space key for the hint
 
-# References
-Project insipired by TechWithTim
