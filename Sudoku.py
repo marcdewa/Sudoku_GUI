@@ -1,8 +1,8 @@
 import pygame
 import copy
 pygame.init()
-
-
+image = pygame.image.load(r'D:\PycharmProjects\FirstGame\heart.png')
+image = pygame.transform.scale(image, (50, 50))
 
 class Board:
     board = [
@@ -18,6 +18,8 @@ class Board:
     ]
 
     def __init__(self,width,height,cols,rows,win):
+        self.clone_board = copy.deepcopy(self.board)
+        self.life = 3
         self.win = win
         self.width = width
         self.height = height
@@ -27,13 +29,28 @@ class Board:
         self.solved = None
         self.solve()
         self.model = None
+        self.selected_pos = None
+
+    def restart(self):
+        self.life = 3
+        self.board = copy.deepcopy(self.clone_board)
+        self.update_cubes()
 
     def update_cubes(self):
         for j in range (self.cols):
             for i in range(self.rows):
-                self.cubes[i][j].value = self.board[i][j]
+                self.cubes[j][i].value = int(self.board[j][i])
 
         # [[self.cubes[i][j].value = self.board[i][j] for j in range(self.cols)] for i in range(self.rows)]
+    def input(self,key):
+        y,x = self.selected_pos
+        if self.board[y][x] != 0:
+            return
+
+        if self.solved[y][x] == key:
+            self.board[y][x] = int(key)
+        else:
+            self.life = self.life-1
 
     def draw(self, win):
         fnt = pygame.font.SysFont("comicsans", 40)
@@ -53,17 +70,14 @@ class Board:
             for j in range(9):
                 self.cubes[i][j].draw(self.win)
 
-    def select(self,y ,x):
+    def select(self, y, x):
         for i in range(9):
             for j in range(9):
                 self.cubes[i][j].selected = False
         self.cubes[y][x].selected = True
+        self.selected_pos = (y, x)
 
     def parse(self, pos):
-        """
-        :param: pos
-        :return: (row, col)
-        """
         if pos[0] < self.width and pos[1] < self.height:
             gap = self.width / 9
             x = pos[0] // gap
@@ -101,6 +115,7 @@ class Board:
                             self.board[y][x] = 0
                     return
         self.solved = copy.deepcopy(self.board)
+        print(self.solved)
 
     def gui_solve(self):
         for y in range(9):
@@ -114,7 +129,7 @@ class Cube:
     def __init__(self, value, row, col, width, height):
         self.value = value
         self.width = width
-        self.height= height
+        self.height = height
         self.col = col
         self.row = row
         self.selected = False
@@ -146,6 +161,8 @@ def redraw_board(board, seconds, win):
     fnt = pygame.font.SysFont("comicsans", 35)
     text = fnt.render("Time: " + time(seconds), 1, (0, 0, 0))
     win.blit(text, (400, 560))
+    for i in range(board.life):
+        win.blit(image, (10+(i*55), 545))
     board.draw(win)
 
 def main():
@@ -153,23 +170,68 @@ def main():
     pygame.display.set_caption("Sudoku")
     board = Board(540, 600, 9, 9, win)
     start_ticks = pygame.time.get_ticks()
-
+    key = None
     run = True
+
     while run:
         seconds = int((pygame.time.get_ticks() - start_ticks) / 1000)
-
 
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 run = False
+
             if event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_SPACE:
                     board.gui_solve()
+                if event.key == pygame.K_1:
+                    key = 1
+                if event.key == pygame.K_2:
+                    key = 2
+                if event.key == pygame.K_3:
+                    key = 3
+                if event.key == pygame.K_4:
+                    key = 4
+                if event.key == pygame.K_5:
+                    key = 5
+                if event.key == pygame.K_6:
+                    key = 6
+                if event.key == pygame.K_7:
+                    key = 7
+                if event.key == pygame.K_8:
+                    key = 8
+                if event.key == pygame.K_9:
+                    key = 9
+                if event.key == pygame.K_KP1:
+                    key = 1
+                if event.key == pygame.K_KP2:
+                    key = 2
+                if event.key == pygame.K_KP3:
+                    key = 3
+                if event.key == pygame.K_KP4:
+                    key = 4
+                if event.key == pygame.K_KP5:
+                    key = 5
+                if event.key == pygame.K_KP6:
+                    key = 6
+                if event.key == pygame.K_KP7:
+                    key = 7
+                if event.key == pygame.K_KP8:
+                    key = 8
+                if event.key == pygame.K_KP9:
+                    key = 9
 
         if event.type == pygame.MOUSEBUTTONDOWN:
             pos = pygame.mouse.get_pos()
             parsed_pos = board.parse(pos)
             board.select(parsed_pos[0], parsed_pos[1])
+
+        if board.selected_pos and key!=None:
+            board.input(key)
+            key = None
+
+        if board.life == 0:
+            board.restart()
+            start_ticks = pygame.time.get_ticks()
 
         redraw_board(board, seconds, win)
         pygame.display.update()
