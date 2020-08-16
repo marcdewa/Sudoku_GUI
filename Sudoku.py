@@ -115,7 +115,6 @@ class Board:
                             self.board[y][x] = 0
                     return
         self.solved = copy.deepcopy(self.board)
-        print(self.solved)
 
     def gui_solve(self):
         for y in range(9):
